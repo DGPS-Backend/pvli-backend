@@ -57,8 +57,14 @@ REGISTRATION_AUTO_LOGIN = env.bool('REGISTRATION_AUTO_LOGIN', default=True)
 # -----------------------------------------------------------------------------
 # Databases
 # -----------------------------------------------------------------------------
-DJANGO_DATABASE_URL = env.db('DATABASE_URL')
-DATABASES = {'default': DJANGO_DATABASE_URL}
+#DJANGO_DATABASE_URL = env.db('DATABASE_URL', default='sqlite:my-tmp-sqlite.db')
+#DATABASES = {'default': DJANGO_DATABASE_URL}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR + 'db.sqlite3',
+    }
+}
 
 # -----------------------------------------------------------------------------
 # Applications configuration

@@ -29,11 +29,10 @@ django = "*"
 gunicorn = "*"
 django-environ = "*"
 django-debug-toolbar = "*"
-psycopg2-binary = "*"
 django-webpack-loader = "*"
 django-extensions = "*"
 celery = "*"
 django-registration-redux = "*"
 
 [requires]
-python_version = "3.*"
+python_version = "3.9"

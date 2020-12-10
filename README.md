@@ -18,7 +18,7 @@ Create a database for your project. Then you need to create a file called `.env`
 ENV=dev
 DEBUG=on
 SECRET_KEY='123'
-DATABASE_URL=postgres://<user>:<password>@127.0.0.1:5432/<db_name>
+# DATABASE_URL=postgres://<user>:<password>@127.0.0.1:5432/<db_name>
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
 USE_DEBUG_TOOLBAR=on
 ALLOWED_HOSTS=web,localhost,127.0.0.1
