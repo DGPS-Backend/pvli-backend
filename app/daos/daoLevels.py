@@ -1,4 +1,5 @@
 import mongoengine as me
 
 class Level(me.Document):
-    i = 1 # por poner algo
+    id_level = me.StringField(primary_key=True)
+    json_phaser = me.StringField(required=True)
