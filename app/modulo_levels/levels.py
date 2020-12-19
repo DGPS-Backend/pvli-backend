@@ -43,7 +43,7 @@ def storeLevel():
         id_level = randint(0, max_level_id)
 
         try:
-            level = Level(id_level=id_level, name_level=data["name_level"], json_phaser=data["json"], rates=[], comments=[], blocked=False)
+            level = Level(id_level=id_level, name_level=data["name_level"], json_phaser=data["json"], rate=0, rate_count=0 comments=[], blocked=False)
 
             level.save(force_insert=True)
 
@@ -65,5 +65,21 @@ def rateLevel():
 
 @levels.route('/eraseLevel', methods=['POST'])
 def eraseLevel():
+
     print("/eraseLevel RECIBE", request.get_json())
-    return jsonify({"return_code": "200"}), 200
+
+    data = request.get_json()
+    response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+
+    if ("id_level" in data):
+        try:
+            level = Level.objects(id_level=data["id_level"]).get()
+
+            level.delete()
+
+            response = jsonify({"return_code": 200, "message": "OK"}), 200
+
+        except:
+            pass
+
+    return response
