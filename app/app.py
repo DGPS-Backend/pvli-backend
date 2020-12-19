@@ -26,22 +26,22 @@ db = MongoEngine(app)
 # *** Prueba para saber si el servidor responde ***
 @app.route('/prueba', methods=['GET','POST','PUT','DELETE'])
 def prueba():
-    return jsonify({"return_code": "200"}), 200
+    return jsonify({"return_code": "200", "message": 'El servidor está respondiento'}), 200
 
 # *** La petición solicitada no se ha encontrado ***
 @app.errorhandler(404)
 def err404(error):
-    return jsonify({"return_code": "404"}), 404
+    return jsonify({"return_code": "404", "message": 'Solicitud no encontrada'}), 404
 
 # *** La petición es correcta, pero el método de invocación no ***
 @app.errorhandler(405)
 def err405(error):
-    return jsonify({"return_code": "405"}), 405
+    return jsonify({"return_code": "405", "message": 'Solicitud no permitida'}), 405
 
 # *** Error interno en el servidor ***
 @app.errorhandler(500)
 def err500(error):
-    return jsonify({"return_code": "500"}), 500
+    return jsonify({"return_code": "500", "message": 'Fallo interno en el servidor'}), 500
 
 if __name__ == "__main__":
 
