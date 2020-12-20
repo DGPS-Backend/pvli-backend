@@ -55,9 +55,27 @@ def storeLevel():
 
 @levels.route('/commentLevel', methods=['PUT'])
 def commentLevel():
-    print("/commentLevel RECIBE", request.get_json())
-    return jsonify({"return_code": "200"}), 200
 
+    print("/commentLevel RECIBE", request.get_json())
+
+    data = request.get_json()
+    response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+
+    if ("id_level" in data) and ("comment" in data):
+        try:
+            level = Level.objects(id_level=data["id_level"]).get()
+            Level.objects(id_level=data["id_level"]).update_one(push__comments=data[comment])
+            # level.update_one(push__comments=data[comment]) # Si se puede asi, mejor
+
+            level.reload()
+
+            response = jsonify({"return_code": 200, "message": "OK"}), 200
+        except:
+            pass
+
+    return response
+
+# ESTA FUNCION MEJOR NO IMPLEMENTARLA HASTA QUE EN FRONTEND DECIDAN COMO QUIEREN LAS PUNTUACIONES
 @levels.route('/rateLevel', methods=['PUT'])
 def rateLevel():
     print("/rateLevel RECIBE", request.get_json())
