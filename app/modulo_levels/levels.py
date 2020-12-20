@@ -79,7 +79,19 @@ def commentLevel():
 @levels.route('/rateLevel', methods=['PUT'])
 def rateLevel():
     print("/rateLevel RECIBE", request.get_json())
-    return jsonify({"return_code": "200"}), 200
+
+    data = request.get_json()
+    response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+
+    if ("id_level" in data) and ("rate" in data):
+        try:
+            ### NO LO HAGAS TODAVIA LOCOOO
+
+            response = jsonify({"return_code": 200, "message": "OK"}), 200
+        except:
+            pass
+
+    return response
 
 @levels.route('/eraseLevel', methods=['POST'])
 def eraseLevel():
