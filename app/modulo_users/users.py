@@ -10,12 +10,12 @@ users = Blueprint("users", __name__)
 
 @users.route('/newUser', methods=['POST'])
 def newUser():
-    
-    data = request.get_json() 
+
+    data = request.get_json()
     response = jsonify({"return_code": 200, "message": "OK"}), 200
 
-    if ("username" in data) and ("password" in data):    
-        
+    if ("username" in data) and ("password" in data):
+
         try:
             Usuarios(username=data["username"], password=data["password"]).save(force_insert=True)
         except NotUniqueError:
@@ -31,6 +31,13 @@ def newUser():
 
     return response
 
+# OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
+# OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
+# OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
+# OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
+# OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
+# OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
+# OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
 @users.route('/login', methods=['POST'])
 def login():
     print("/login RECIBE", request.get_json())
