@@ -43,7 +43,7 @@ def storeLevel():
         id_level = randint(0, max_level_id)
 
         try:
-            level = Level(id_level=id_level, name_level=data["name_level"], json_phaser=data["json"], rate=0, rate_count=0 comments=[], blocked=False)
+            level = Level(id_level=id_level, name_level=data["name_level"], json_phaser=data["json"], rate=0, rate_count=0, comments=[], blocked=False)
 
             level.save(force_insert=True)
 
