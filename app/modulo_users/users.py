@@ -74,7 +74,6 @@ def unblockUser():
         response = jsonify({"return_code": 400, "message": "Wrong Solicitation"}), 400
 
     return response
-
 # OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
 # OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
 # OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
