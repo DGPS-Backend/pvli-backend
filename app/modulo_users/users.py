@@ -14,7 +14,7 @@ def newUser():
     data = request.get_json()
     response = jsonify({"return_code": 200, "message": "OK"}), 200
 
-    if ("username" in data) and ("password" in data):
+    if ("username" in data) and ("password" in data) and ("blocked" in data):
 
         try:
             Usuarios(username=data["username"], password=data["password"], blocked=data["blocked"]).save(force_insert=True)
@@ -31,7 +31,6 @@ def newUser():
 
     return response
 
-     -
 # OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
 # OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
 # OJO QUE LO MISMO HAY QUE HACER LA POLLA DE GOGLE
