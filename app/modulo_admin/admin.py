@@ -80,3 +80,21 @@ def unblockUser():
         response = jsonify({"return_code": 400, "message": "Wrong Solicitation"}), 400
 
     return response
+
+@admin.route('/getUserInfo', methods=['GET'])
+def getUserInfo():
+
+    data = request.get_json()
+    response = jsonify({"return_code": 200, "message": "OK"}), 200
+
+    if ("username" in data):
+        try:
+            user = Usuarios.objects(username=data["username"]).get()
+            response = jsonify({"return_code": 200, "message": user}), 200
+        except :
+            response = jsonify({"return_code": 500, "message": "No se pueden obtener los datos de los usuarios"}), 400
+    else:
+
+        response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+
+    return response
