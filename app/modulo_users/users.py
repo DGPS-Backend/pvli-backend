@@ -17,7 +17,7 @@ def newUser():
     if ("username" in data) and ("password" in data):
 
         try:
-            Usuarios(username=data["username"], password=data["password"]).save(force_insert=True)
+            Usuarios(username=data["username"], password=data["password"], blocked=data["blocked"]).save(force_insert=True)
         except NotUniqueError:
             response = jsonify({"return_code": 601, "message": 'El usuario ya existe'}), 601
         except ValidationError:
