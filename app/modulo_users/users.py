@@ -39,7 +39,7 @@ def blockUser():
 
     if ("username" in data):
         try:
-            user = Users.objects(username=data["username"])
+            user = Usuarios.objects(username=data["username"])
             user.update_one(push__blocked=False)
             user = user.get()
             user.reload()
@@ -61,7 +61,7 @@ def unblockUser():
 
     if ("username" in data):
         try:
-            user = Users.objects(username=data["username"])
+            user = Usuarios.objects(username=data["username"])
             user.update_one(push__blocked=False)
             user = user.get()
             user.reload()
