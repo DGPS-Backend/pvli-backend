@@ -38,10 +38,14 @@ def blockUser():
     if ("username" in data):
         try:
             user = Usuarios.objects(username=data["username"])
-            user.update_one(push__blocked=False)
-            user = user.get()
-            user.reload()
-            response = jsonify({"return_code": 200, "message": "The user is blocked"}), 200
+            userInfo = user.get()
+            if userInfo.blocked :
+                mssg = "the user: {} was already blocked".format(userInfo.username)
+            else :
+                user.update_one(blocked=True)
+                mssg = "the user: {} is now blocked".format(userInfo.username)
+                
+            response = jsonify({"return_code": 200, "message": mssg}), 200
         except :
             response = jsonify({"return_code": 200, "message": "The user can`t be blocked"}), 601
 
@@ -60,10 +64,14 @@ def unblockUser():
     if ("username" in data):
         try:
             user = Usuarios.objects(username=data["username"])
-            user.update_one(push__blocked=False)
-            user = user.get()
-            user.reload()
-            response = jsonify({"return_code": 200, "message": "The user is unblocked"}), 200
+            userInfo = user.get()
+            if userInfo.blocked :
+                user.update_one(blocked=False)
+                mssg = "the user: {} is now not blocked".format(userInfo.username)
+            else :
+                mssg = "the user: {} was already not blocked".format(userInfo.username)
+                
+            response = jsonify({"return_code": 200, "message": mssg}), 200
         except :
             response = jsonify({"return_code": 200, "message": "The user can`t be unblocked"}), 601
 
