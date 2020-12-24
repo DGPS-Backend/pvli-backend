@@ -13,10 +13,12 @@ class Level(me.Document):
     # # Almacena si el nivel ha sido bloqueado
     blocked = me.BooleanField(required=True)
     # # Media de las puntuaciones de todos los usuarios
-    rating = me.ListField(me.IntField(), required=True) # COMO SE HACE ESTA MIERDA TODOTDO
+    # rating = me.ListField(me.IntField(), required=True)
 
     phaserObject = me.StringField(required=True)
 
-# class LevelRating():
-#     avg = 0.0
-#     ratingByUser = []
+class LevelRating(me.Document):
+    # ID del nivel
+    id = me.IntField(primary_key=True)
+    avg = me.FloatField(required=True)
+    ratingByUser = me.ListField(me.IntField(), required=True) # MECAGUEN COMO SE METE EL USUARIO AQUI

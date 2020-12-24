@@ -1,7 +1,7 @@
 from flask import request
 from flask import jsonify
 from flask import Blueprint
-from daos.daoLevels import Level
+from daos.daoLevels import Level, LevelRating
 from mongoengine.errors import NotUniqueError
 from mongoengine.errors import ValidationError
 from pymongo.errors import ServerSelectionTimeoutError
@@ -13,7 +13,7 @@ levels = Blueprint("levels", __name__)
 
 
 @levels.route('/loadLevels', methods=['POST'])
-def loadLevel():
+def loadLevels():
 
     print("/loadLevels RECIBE", request.get_json())
 
@@ -50,7 +50,9 @@ def loadLevel():
             userName = level.userName
             comments = level.comments
             blocked = level.blocked
-            rating = level.rating # TODO PENDIENTE DE SACAR LA PUTA MEDIA DAO
+
+            rate = LevelRating.objects(id=data["id_level"]).get()
+            avg = rate.avg
 
             response = jsonify({"return_code": 200,
                                 "message": "OK",
@@ -58,9 +60,9 @@ def loadLevel():
                                 "name_level": name,
                                 "img": image,
                                 "id_user": userName, #PENDIENTE ISAURO
-                                "comments": comments,
+                                "comments": comments, #TODO
                                 "blocked": blocked, #PENDIENTE ISAURO
-                                "rate": rating,
+                                "rate": avg,
                                 }), 200
 
         except:
@@ -81,9 +83,15 @@ def storeLevel():
         id = randint(0, max_level_id)
 
         try:
-            # TODO EL COMENTS Y RATE ARREGLAR BIEN EN EL DAO DE LA POLLA
-            Level(id=id, name=data["name_level"], phaserObject=data["json"], comments=[""], blocked=False, rating=[0]).save(force_insert=True)
-            response = jsonify({"return_code": 200, "message": "OK", "id": id, "json": data["json"]}), 200
+            # TODO EL COMENTS ARREGLAR BIEN EN EL DAO DE LA POLLA
+            Level(id=id, name=data["name_level"], phaserObject=data["json"], comments=[""], blocked=False).save(force_insert=True)
+            LevelRating(id=id, avg=0.0, ratingByUser=[0]).save(force_insert=True)
+
+            response = jsonify({"return_code": 200,
+                                "message": "OK",
+                                "id": id,
+                                "json": data["json"]
+                                }), 200
         except:
             pass
 
@@ -119,10 +127,10 @@ def rateLevel():
 
     if ("id_level" in data) and ("rate" in data):
         try:
-            level = Level.objects(id=data["id_level"])
+            rate = LevelRating.objects(id=data["id_level"])
             # TODO ADAPTAR AL FORMATO DE PUNTUACION TOCHO DE LOS GUEVOS
             # Seria insertar mas calcular la media
-            level.update_one(push__rating=data["rate"])
+            rate.update_one(push__ratingByUser=data["rate"])
 
             response = jsonify({"return_code": 200, "message": "OK"}), 200
         except:
