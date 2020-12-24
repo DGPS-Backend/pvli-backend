@@ -60,7 +60,7 @@ def storeLevel():
 
         try:
             # TODO EL COMENTS Y RATE ARREGLAR BIEN EN EL DAO DE LA POLLA
-            Level(id=id, name=data["name_level"], phaserObject=data["json"], comments=[""], blocked=False, rating=[""]).save(force_insert=True)
+            Level(id=id, name=data["name_level"], phaserObject=data["json"], comments=[""], blocked=False, rating=[0]).save(force_insert=True)
             response = jsonify({"return_code": 200, "message": "OK", "id": id, "json": data["json"]}), 200
         except:
             pass
@@ -88,7 +88,6 @@ def commentLevel():
 
     return response
 
-# ESTA FUNCION MEJOR NO IMPLEMENTARLA HASTA QUE EN FRONTEND DECIDAN COMO QUIEREN LAS PUNTUACIONES
 @levels.route('/rateLevel', methods=['PUT'])
 def rateLevel():
     print("/rateLevel RECIBE", request.get_json())
@@ -98,7 +97,10 @@ def rateLevel():
 
     if ("id_level" in data) and ("rate" in data):
         try:
-            ### NO LO HAGAS TODAVIA LOCOOO
+            level = Level.objects(id=data["id_level"])
+            # TODO ADAPTAR AL FORMATO DE PUNTUACION TOCHO DE LOS GUEVOS
+            # Seria insertar mas calcular la media
+            level.update_one(push__rating=data["rate"])
 
             response = jsonify({"return_code": 200, "message": "OK"}), 200
         except:
@@ -116,7 +118,7 @@ def eraseLevel():
 
     if ("id_level" in data):
         try:
-            level = Level.objects(id=data["id_level"]).get()
+            level = Level.objects(id=data["id_level"])
 
             level.delete()
 
