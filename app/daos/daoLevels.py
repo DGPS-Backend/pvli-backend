@@ -1,21 +1,22 @@
 import mongoengine as me
 
 class Level(me.Document):
-    id = me.StringField(primary_key=True)
+    id = me.IntField(primary_key=True)
+
     name = me.StringField(required=True)
-    image = me.StringField(required=False)
-    # Usuario que lo crea
-    userName = me.StringField(required=False)
+
+    image = me.StringField()
+    # Usuario que lo crea, no es obligatorio porque puede estar hecho de antes
+    userName = me.StringField() # REVISAR MODELO DEL DOMINIO
     # Comentarios de todos los usuarios
-    comments = me.StringField(required=True)
-    # Almacena si el nivel ha sido bloqueado
-    blocked = me.StringField(required=True)
-    # Media de las puntuaciones de todos los usuarios
-    rating = me.StringField(required=True)
-    # Número de usuarios que han puntuado el nivel (para actualizar el valor anterior)
-    # rate_count = me.StringField(required=True)
+    comments = me.ListField(me.StringField(), required=True) # COMO SE HACE ESTA MIERDA TODOTDO
+    # # Almacena si el nivel ha sido bloqueado
+    blocked = me.BooleanField(required=True)
+    # # Media de las puntuaciones de todos los usuarios
+    rating = me.ListField(me.StringField(), required=True) # COMO SE HACE ESTA MIERDA TODOTDO
+
     phaserObject = me.StringField(required=True)
 
-class LevelRating():
-    avg = 0.0
-    ratingByUser = []
+# class LevelRating():
+#     avg = 0.0
+#     ratingByUser = []

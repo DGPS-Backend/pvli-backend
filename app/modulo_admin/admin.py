@@ -44,7 +44,7 @@ def blockUser():
             else :
                 user.update_one(blocked=True)
                 mssg = "the user: {} is now blocked".format(userInfo.username)
-                
+
             response = jsonify({"return_code": 200, "message": mssg}), 200
         except :
             response = jsonify({"return_code": 200, "message": "The user can`t be blocked"}), 601
@@ -54,7 +54,7 @@ def blockUser():
         response = jsonify({"return_code": 400, "message": "Wrong Solicitation"}), 400
 
     return response
-    
+
 @admin.route('/unblockUser', methods=['PUT'])
 def unblockUser():
 
@@ -70,7 +70,7 @@ def unblockUser():
                 mssg = "the user: {} is now not blocked".format(userInfo.username)
             else :
                 mssg = "the user: {} was already not blocked".format(userInfo.username)
-                
+
             response = jsonify({"return_code": 200, "message": mssg}), 200
         except :
             response = jsonify({"return_code": 200, "message": "The user can`t be unblocked"}), 601

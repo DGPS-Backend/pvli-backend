@@ -11,6 +11,7 @@ users = Blueprint("users", __name__)
 @users.route('/newUser', methods=['POST'])
 def newUser():
 
+    print(request.get_json())
     data = request.get_json()
     response = jsonify({"return_code": 200, "message": "OK"}), 200
 

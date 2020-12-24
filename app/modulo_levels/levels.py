@@ -21,9 +21,25 @@ def loadLevel():
 
     if ("id_level" in data):
         try:
-            json = Level.objects(id=data["id_level"]).get().phaserObject
+            level = Level.objects(id=data["id_level"]).get()
+            json = level.phaserObject
+            name = level.name
+            image = level.image
+            userName = level.userName
+            comments = level.comments
+            blocked = level.blocked
+            rating = level.rating # TODO PENDIENTE DE SACAR LA PUTA MEDIA DAO
 
-            response = jsonify({"return_code": 200, "message": "OK", "json": json}), 200
+            response = jsonify({"return_code": 200,
+                                "message": "OK",
+                                "json": json,
+                                "name_level": name,
+                                "img": image,
+                                "id_user": userName, #PENDIENTE ISAURO
+                                "comments": comments,
+                                "blocked": blocked, #PENDIENTE ISAURO
+                                "rate": rating,
+                                }), 200
 
         except:
             pass
@@ -43,10 +59,8 @@ def storeLevel():
         id = randint(0, max_level_id)
 
         try:
-            level = Level(id=id, name=data["name_level"], phaserObject=data["json"], rating=[], comments=[], blocked=False)
-
-            level.save(force_insert=True)
-
+            # TODO EL COMENTS Y RATE ARREGLAR BIEN EN EL DAO DE LA POLLA
+            Level(id=id, name=data["name_level"], phaserObject=data["json"], comments=[""], blocked=False, rating=[""]).save(force_insert=True)
             response = jsonify({"return_code": 200, "message": "OK", "id": id, "json": data["json"]}), 200
         except:
             pass
