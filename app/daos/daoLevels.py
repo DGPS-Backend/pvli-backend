@@ -15,3 +15,7 @@ class Level(me.Document):
     # Número de usuarios que han puntuado el nivel (para actualizar el valor anterior)
     # rate_count = me.StringField(required=True)
     phaserObject = me.StringField(required=True)
+
+class LevelRating():
+    avg = 0.0
+    ratingByUser = []

@@ -21,7 +21,7 @@ def loadLevel():
 
     if ("id_level" in data):
         try:
-            json = Level.objects(id_level=data["id_level"]).get().json_phaser
+            json = Level.objects(id=data["id_level"]).get().phaserObject
 
             response = jsonify({"return_code": 200, "message": "OK", "json": json}), 200
 
@@ -40,14 +40,14 @@ def storeLevel():
 
     if ("name_level" in data) and ("json" in data):
         # Genera ID único
-        id_level = randint(0, max_level_id)
+        id = randint(0, max_level_id)
 
         try:
-            level = Level(id_level=id_level, name_level=data["name_level"], json_phaser=data["json"], rate=0, rate_count=0, comments=[], blocked=False)
+            level = Level(id=id, name=data["name_level"], phaserObject=data["json"], rating=[], comments=[], blocked=False)
 
             level.save(force_insert=True)
 
-            response = jsonify({"return_code": 200, "message": "OK", "id_level": id_level, "json": data["json"]}), 200
+            response = jsonify({"return_code": 200, "message": "OK", "id": id, "json": data["json"]}), 200
         except:
             pass
 
@@ -63,8 +63,8 @@ def commentLevel():
 
     if ("id_level" in data) and ("comment" in data):
         try:
-            level = Level.objects(id_level=data["id_level"]).get()
-            Level.objects(id_level=data["id_level"]).update_one(push__comments=data[comment])
+            level = Level.objects(id=data["id_level"]).get()
+            Level.objects(id=data["id_level"]).update_one(push__comments=data[comment])
             # level.update_one(push__comments=data[comment]) # Si se puede asi, mejor
 
             level.reload()
@@ -103,7 +103,7 @@ def eraseLevel():
 
     if ("id_level" in data):
         try:
-            level = Level.objects(id_level=data["id_level"]).get()
+            level = Level.objects(id=data["id_level"]).get()
 
             level.delete()
 
