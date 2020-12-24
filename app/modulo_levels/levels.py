@@ -77,11 +77,10 @@ def commentLevel():
 
     if ("id_level" in data) and ("comment" in data):
         try:
-            level = Level.objects(id=data["id_level"]).get()
-            Level.objects(id=data["id_level"]).update_one(push__comments=data[comment])
-            # level.update_one(push__comments=data[comment]) # Si se puede asi, mejor
-
-            level.reload()
+            level = Level.objects(id=data["id_level"])
+            # TODO ADAPTAR AL FORMATO DE COMENTARIO TOCHO DE LOS GUEVOS
+            level.update_one(push__comments=data["comment"])
+            # level.reload()
 
             response = jsonify({"return_code": 200, "message": "OK"}), 200
         except:
