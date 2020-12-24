@@ -11,6 +11,28 @@ max_level_id = 999999999999
 
 levels = Blueprint("levels", __name__)
 
+
+@levels.route('/loadLevels', methods=['POST'])
+def loadLevel():
+
+    print("/loadLevels RECIBE", request.get_json())
+
+    data = request.get_json()
+    response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+
+    if ("filter_text" in data):
+        try:
+            # COMO NO ME DIGAS QUE OSTIAS VA EN EL FILTRO POCO...
+
+            response = jsonify({"return_code": 200,
+                                "message": "OK"
+                                }), 200
+
+        except:
+            pass
+
+    return response
+
 @levels.route('/loadLevel', methods=['POST'])
 def loadLevel():
 
