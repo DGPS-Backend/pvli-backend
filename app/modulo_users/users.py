@@ -7,6 +7,25 @@ from pymongo.errors import ServerSelectionTimeoutError
 
 users = Blueprint("users", __name__)
 
+#Decorator function. It returns a new view function that wraps the original
+# view it’s applied to. The new function checks if a user is loaded and
+# redirects to the login page otherwise. If a user is loaded, the original
+# view is called and continues normally.
+def user_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is not None:
+            isRegularUser = True #TODO: Check if g.user is a regular user.
+
+            if isRegularUser:
+                return view(**kwargs)
+
+        #By default, redirect to the login page if there is no user logged in.
+        #redirect(url_for('TODO insert url for login page here'))
+        return jsonify({"note": "this should redirect to the login page"}), 200
+
+    return wrapped_view
+
 @users.route('/newUser', methods=['POST'])
 def newUser():
 
@@ -56,23 +75,3 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = None #TODO: get the user with user_id from the database.
-
-#Decorator function. It returns a new view function that wraps the original
-# view it’s applied to. The new function checks if a user is loaded and
-# redirects to the login page otherwise. If a user is loaded, the original
-# view is called and continues normally.
-def user_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        #By default, redirect to the login page if there is no user logged in.
-        ret = redirect(url_for('TODO insert url for login page here'))
-
-        if g.user is not None:
-            isRegularUser = True #TODO: Check if g.user is a regular user.
-
-            if isRegularUser:
-                ret = view(**kwargs)
-
-        return ret
-
-    return wrapped_view
