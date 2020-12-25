@@ -61,12 +61,18 @@ def load_logged_in_user():
 # view it’s applied to. The new function checks if a user is loaded and
 # redirects to the login page otherwise. If a user is loaded, the original
 # view is called and continues normally.
-def login_required(view):
+def regular_user_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for('TODO insert url for login page here'))
+        #By default, redirect to the login page if there is no user logged in.
+        ret = redirect(url_for('TODO insert url for login page here'))
 
-        return view(**kwargs)
+        if g.user is not None:
+            isRegularUser = True #TODO: Check if the user in g.user is a regular user.
+
+            if isRegularUser:
+                ret = view(**kwargs)
+
+        return ret
 
     return wrapped_view
