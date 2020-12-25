@@ -1,6 +1,5 @@
-from flask import request
-from flask import jsonify
-from flask import Blueprint
+import functools
+from flask import request, jsonify, Blueprint, session, g, redirect, url_for
 from daos.daoLevels import Level
 from daos.daoUsers import Usuarios
 from mongoengine.errors import NotUniqueError
@@ -98,3 +97,33 @@ def getUserInfo():
         response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
 
     return response
+
+# @admin.before_app_request() registers a function that runs before the view function,
+# no matter what URL is requested. load_logged_in_user checks if a user id is
+# stored in the session and gets that user’s data from the database,
+# storing it on g.user, which lasts for the length of the request.
+# If there is no user id, or if the id doesn’t exist, g.user will be None.
+@admin.before_app_request
+def load_logged_in_user():
+    user_id = session.get('user_id')
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = None #TODO: get the user with user_id from the database.
+
+def admin_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        #By default, redirect to the login page if there is no admin logged in.
+        ret = redirect(url_for('TODO insert url for login page here'))
+
+        if g.user is not None:
+            isAdminUser = True #TODO: Check if g.user is an administrator.
+
+            if isAdminUser:
+                ret = view(**kwargs)
+
+        return ret
+
+    return wrapped_view
