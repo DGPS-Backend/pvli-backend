@@ -68,9 +68,25 @@ def regular_user_required(view):
         ret = redirect(url_for('TODO insert url for login page here'))
 
         if g.user is not None:
-            isRegularUser = True #TODO: Check if the user in g.user is a regular user.
+            isRegularUser = True #TODO: Check if g.user is a regular user.
 
             if isRegularUser:
+                ret = view(**kwargs)
+
+        return ret
+
+    return wrapped_view
+
+def admin_user_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        #By default, redirect to the login page if there is no admin logged in.
+        ret = redirect(url_for('TODO insert url for login page here'))
+
+        if g.user is not None:
+            isAdminUser = True #TODO: Check if g.user is an administrator.
+
+            if isAdminUser:
                 ret = view(**kwargs)
 
         return ret
