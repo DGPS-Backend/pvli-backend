@@ -1,6 +1,4 @@
-from flask import request
-from flask import jsonify
-from flask import Blueprint
+from flask import request, jsonify, Blueprint, session, g
 from daos.daoUsers import Usuarios
 from mongoengine.errors import NotUniqueError
 from mongoengine.errors import ValidationError
@@ -43,3 +41,17 @@ def newUser():
 def login():
     print("/login RECIBE", request.get_json())
     return jsonify({"return_code": "200"}), 200
+
+#bp.before_app_request() registers a function that runs before the view function,
+# no matter what URL is requested. load_logged_in_user checks if a user id is
+# stored in the session and gets that user’s data from the database,
+# storing it on g.user, which lasts for the length of the request.
+# If there is no user id, or if the id doesn’t exist, g.user will be None.
+@users.before_app_request
+def load_logged_in_user():
+    user_id = session.get('user_id')
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = None #TODO: get the user with user_id from the database.
