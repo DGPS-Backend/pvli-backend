@@ -24,11 +24,14 @@ def admin_required(view):
     return wrapped_view
 
 @admin.route('/getStatistics', methods=['GET'])
-@admin_required
+#@admin_required TODO uncomment for release.
 def getStatistics():
-    data = request.get_json()
+    #receivedData = request.get_json()
+    dataToSend = "No statistics."
 
-    return jsonify({"return_code": "200"}), 200
+    #TODO get the statistics into dataToSend.
+
+    return jsonify({"return_code": "200", "data": dataToSend}), 200
 
 @admin.route('/getAdminData', methods=['GET'])
 def getAdminData():
@@ -36,9 +39,20 @@ def getAdminData():
     return jsonify({"return_code": "200"}), 200
 
 @admin.route('/blockLevel', methods=['PUT'])
+#@admin_required TODO uncomment for release.
 def blockLevel():
-    print("/blockLevel RECIBE", request.get_json())
-    return jsonify({"return_code": "200"}), 200
+    receivedData = request.get_json()
+    retCode = None
+
+    if "id_level" in receivedData:
+        idLevel = receivedData["id_level"]
+
+        #TODO block the level with id idLevel.
+        retCode = 200
+    else:
+        retCode = 400
+
+    return jsonify({"return_code": retCode}), 200
 
 @admin.route('/unblockLevel', methods=['PUT'])
 def unblockLevel():
