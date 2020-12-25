@@ -43,7 +43,7 @@ def login():
     print("/login RECIBE", request.get_json())
     return jsonify({"return_code": "200"}), 200
 
-#bp.before_app_request() registers a function that runs before the view function,
+# @users.before_app_request() registers a function that runs before the view function,
 # no matter what URL is requested. load_logged_in_user checks if a user id is
 # stored in the session and gets that user’s data from the database,
 # storing it on g.user, which lasts for the length of the request.
@@ -61,7 +61,7 @@ def load_logged_in_user():
 # view it’s applied to. The new function checks if a user is loaded and
 # redirects to the login page otherwise. If a user is loaded, the original
 # view is called and continues normally.
-def regular_user_required(view):
+def user_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         #By default, redirect to the login page if there is no user logged in.
