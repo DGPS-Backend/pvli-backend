@@ -8,9 +8,26 @@ from pymongo.errors import ServerSelectionTimeoutError
 
 admin = Blueprint("admin", __name__)
 
+def admin_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is not None:
+            isAdminUser = True #TODO: Check if g.user is an administrator.
+
+            if isAdminUser:
+                return view(**kwargs)
+
+        #By default, redirect to the login page if there is no admin logged in.
+        #redirect(url_for('TODO insert url for login page here'))
+        return jsonify({"note": "this should redirect to the login page"}), 200
+
+    return wrapped_view
+
 @admin.route('/getStatistics', methods=['GET'])
+@admin_required
 def getStatistics():
-    print("/getStatistics RECIBE", request.get_json())
+    data = request.get_json()
+
     return jsonify({"return_code": "200"}), 200
 
 @admin.route('/getAdminData', methods=['GET'])
@@ -111,19 +128,3 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = None #TODO: get the user with user_id from the database.
-
-def admin_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        #By default, redirect to the login page if there is no admin logged in.
-        ret = redirect(url_for('TODO insert url for login page here'))
-
-        if g.user is not None:
-            isAdminUser = True #TODO: Check if g.user is an administrator.
-
-            if isAdminUser:
-                ret = view(**kwargs)
-
-        return ret
-
-    return wrapped_view
