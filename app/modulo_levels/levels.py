@@ -1,7 +1,7 @@
 from flask import request
 from flask import jsonify
 from flask import Blueprint
-from daos.daoLevels import Level, LevelRating
+from daos.daoLevels import Level, UserRating, Comment
 from mongoengine.errors import NotUniqueError
 from mongoengine.errors import ValidationError
 from pymongo.errors import ServerSelectionTimeoutError
@@ -42,40 +42,44 @@ def loadLevel():
     response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
 
     if ("id_level" in data):
+
         try:
             
             level = Level.objects(id=data["id_level"]).get()
 
-            json = level.phaserObject
             name = level.name
             image = level.image
-            userName = level.userName
-            comments = level.comments
             blocked = level.blocked
+            json = level.phaserObject
+            # userName = level.username
+            comments = level.comments
+            
 
-            rate = LevelRating.objects(id=data["id_level"]).get()
-            avg = rate.avg
+            # rate = 0 LevelRating.objects(id=data["id_level"]).get()
+            avg = 0 # rate.avg
 
             response = jsonify({"return_code": 200,
                                 "message": "OK",
                                 "json": json,
                                 "name_level": name,
                                 "img": image,
-                                "id_user": userName, #PENDIENTE ISAURO
-                                "comments": comments, #TODO
-                                "blocked": blocked, #PENDIENTE ISAURO
+                                # "id_user": userName, #PENDIENTE ISAURO
+                                "comments": comments,
+                                "blocked": blocked,
                                 "rate": avg,
                                 }), 200
 
-        except:
-            pass
+        except ValidationError:
+            response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
+        except ServerSelectionTimeoutError:
+            response = jsonify({"return_code": 500, "message": "Connection to database failed"}), 500
 
     return response
 
 @levels.route('/storeLevel', methods=['POST'])
 def storeLevel():
 
-    print("/storeLevel RECIBE", request.get_json())
+    # print("/storeLevel RECIBE", request.get_json())
 
     data = request.get_json()
     response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
@@ -103,61 +107,80 @@ def storeLevel():
 @levels.route('/commentLevel', methods=['PUT'])
 def commentLevel():
 
-    print("/commentLevel RECIBE", request.get_json())
+    # print("/commentLevel RECIBE", request.get_json())
 
     data = request.get_json()
-    response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+    response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
 
-    if ("id_level" in data) and ("comment" in data):
+    if ("id_level" in data) and ("id_user" in data) and ("comment" in data):
+        
         try:
-            level = Level.objects(id=data["id_level"])
-            # TODO ADAPTAR AL FORMATO DE COMENTARIO TOCHO DE LOS GUEVOS
-            level.update_one(push__comments=data["comment"])
-            # level.reload()
+            
+            Level.objects(id=data["id_level"]).update_one(push__comments=Comment(username=data["id_user"], comment=data["comment"]))
 
             response = jsonify({"return_code": 200, "message": "OK"}), 200
-        except:
-            pass
+
+        except ValidationError:
+            response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
+        except ServerSelectionTimeoutError:
+            response = jsonify({"return_code": 500, "message": "Connection to database failed"}), 500
 
     return response
 
 @levels.route('/rateLevel', methods=['PUT'])
 def rateLevel():
-    print("/rateLevel RECIBE", request.get_json())
+    
+    # print("/rateLevel RECIBE", request.get_json())
 
     data = request.get_json()
     response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
 
-    if ("id_level" in data) and ("rate" in data):
+    if ("id_level" in data) and ("id_user" in data) and ("rate" in data):
+        
         try:
-            rate = LevelRating.objects(id=data["id_level"])
-            # TODO ADAPTAR AL FORMATO DE PUNTUACION TOCHO DE LOS GUEVOS
-            # Seria insertar mas calcular la media
-            rate.update_one(push__ratingByUser=data["rate"])
+
+            # Actualiza la lista.            
+            Level.objects(id=data["id_level"]).update_one(push__rating__ratingByUser=UserRating(username=data["id_user"], rating=data["rate"]))
+
+            # Calcula la media del nivel.
+            info = Level.objects(id=data["id_level"]).aggregate({"$project": { "average": { "$avg": "$rating.ratingByUser.rating" } } })
+
+            # Obtengo un diccionario con el id del nivel y la media de sus puntuaciones.
+            info = dict(list(info)[0])
+
+            # Establezco la media del nivel una vez recalculada.
+            Level.objects(id=data["id_level"]).update_one(set__rating__avg=info["average"])
 
             response = jsonify({"return_code": 200, "message": "OK"}), 200
-        except:
-            pass
 
+        except ValidationError:
+            response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
+        except ServerSelectionTimeoutError:
+            response = jsonify({"return_code": 500, "message": "Connection to database failed"}), 500
+        
     return response
 
 @levels.route('/eraseLevel', methods=['POST'])
 def eraseLevel():
 
-    print("/eraseLevel RECIBE", request.get_json())
+    # print("/eraseLevel RECIBE", request.get_json())
 
     data = request.get_json()
-    response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+    response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
 
     if ("id_level" in data):
+        
         try:
+        
             level = Level.objects(id=data["id_level"])
 
             level.delete()
 
             response = jsonify({"return_code": 200, "message": "OK"}), 200
 
-        except:
-            pass
+        except ValidationError:
+            response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
+        except ServerSelectionTimeoutError:
+            response = jsonify({"return_code": 500, "message": "Connection to database failed"}), 500
 
     return response

@@ -1,17 +1,18 @@
 import mongoengine as me
+from datetime import datetime as dt
 
 class UserRating(me.EmbeddedDocument):
-    username = me.IntField(required=True)
+    username = me.StringField(required=True)
     rating = me.FloatField(required=True)
 
 class LevelRating(me.EmbeddedDocument):
-    avg = me.FloatField() 
+    avg = me.FloatField(required=True)
     ratingByUser = me.ListField(me.EmbeddedDocumentField(UserRating))
 
 class Comment(me.EmbeddedDocument):
-    timeStamp = me.ComplexDateTimeField() 
-    username = me.StringField() 
-    comment = me.StringField()
+    timestamp = me.DateTimeField(required=True, default=dt.utcnow) 
+    username = me.StringField(required=True) 
+    comment = me.StringField(required=True)
 
 class Level(me.Document):
 
@@ -30,7 +31,7 @@ class Level(me.Document):
     comments = me.ListField(me.EmbeddedDocumentField(Comment))
     
     # Lista de criticas de los usuarios a este nivel.
-    rating = me.EmbeddedDocumentField(LevelRating)
+    rating = me.EmbeddedDocumentField(LevelRating, required=True, default=LevelRating(avg=-1))
 
     phaserObject = me.StringField(required=True)
 
