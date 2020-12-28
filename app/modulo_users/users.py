@@ -1,6 +1,6 @@
 import functools
 from flask import request, jsonify, Blueprint, session, g, redirect, url_for
-from daos.daoUsers import Usuarios
+from daos.daoUsers import User
 from mongoengine.errors import NotUniqueError
 from mongoengine.errors import ValidationError
 from pymongo.errors import ServerSelectionTimeoutError
@@ -29,24 +29,25 @@ def user_required(view):
 @users.route('/newUser', methods=['POST'])
 def newUser():
 
-    print(request.get_json())
+    # print("/newUser RECIBE", request.get_json())
+
     data = request.get_json()
     response = jsonify({"return_code": 200, "message": "OK"}), 200
 
-    if ("username" in data) and ("password" in data) and ("blocked" in data):
+    if ("username" in data) and ("password" in data):
 
         try:
-            Usuarios(username=data["username"], password=data["password"], blocked=data["blocked"]).save(force_insert=True)
+            User(username=data["username"], password=data["password"]).save(force_insert=True)
         except NotUniqueError:
-            response = jsonify({"return_code": 601, "message": 'El usuario ya existe'}), 601
+            response = jsonify({"return_code": 601, "message": "User exists"}), 601
         except ValidationError:
-            response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+            response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
         except ServerSelectionTimeoutError:
-            response = jsonify({"return_code": 500, "message": "No se puede conectar con la base de datos"}), 500
+            response = jsonify({"return_code": 500, "message": "Connection to database failed"}), 500
 
     else:
 
-        response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+        response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
 
     return response
 

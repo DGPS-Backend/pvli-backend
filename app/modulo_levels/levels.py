@@ -43,7 +43,9 @@ def loadLevel():
 
     if ("id_level" in data):
         try:
+            
             level = Level.objects(id=data["id_level"]).get()
+
             json = level.phaserObject
             name = level.name
             image = level.image
@@ -79,21 +81,22 @@ def storeLevel():
     response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
 
     if ("name_level" in data) and ("json" in data):
+        
         # Genera ID único
         id = randint(0, max_level_id)
 
         try:
-            # TODO EL COMENTS ARREGLAR BIEN EN EL DAO DE LA POLLA
-            Level(id=id, name=data["name_level"], phaserObject=data["json"], comments=[""], blocked=False).save(force_insert=True)
-            LevelRating(id=id, avg=0.0, ratingByUser=[0]).save(force_insert=True)
 
-            response = jsonify({"return_code": 200,
-                                "message": "OK",
-                                "id": id,
-                                "json": data["json"]
-                                }), 200
-        except:
-            pass
+            Level(id=id, name=data["name_level"], phaserObject=data["json"]).save(force_insert=True)
+
+            response = jsonify({"return_code": 200, "message": "OK", "id": id, "json": data["json"]}), 200
+
+        except NotUniqueError:
+            response = jsonify({"return_code": 601, "message": "User exists"}), 601
+        except ValidationError:
+            response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
+        except ServerSelectionTimeoutError:
+            response = jsonify({"return_code": 500, "message": "Connection to database failed"}), 500
 
     return response
 

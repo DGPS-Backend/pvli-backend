@@ -1,7 +1,7 @@
 import functools
 from flask import request, jsonify, Blueprint, session, g, redirect, url_for
 from daos.daoLevels import Level
-from daos.daoUsers import Usuarios
+from daos.daoUsers import User
 from mongoengine.errors import NotUniqueError
 from mongoengine.errors import ValidationError
 from pymongo.errors import ServerSelectionTimeoutError
@@ -67,7 +67,7 @@ def blockUser():
 
     if ("username" in data):
         try:
-            user = Usuarios.objects(username=data["username"])
+            user = User.objects(username=data["username"])
             userInfo = user.get()
             if userInfo.blocked :
                 mssg = "the user: {} was already blocked".format(userInfo.username)
@@ -93,7 +93,7 @@ def unblockUser():
 
     if ("username" in data):
         try:
-            user = Usuarios.objects(username=data["username"])
+            user = User.objects(username=data["username"])
             userInfo = user.get()
             if userInfo.blocked :
                 user.update_one(blocked=False)
@@ -119,7 +119,7 @@ def getUserInfo():
 
     if ("username" in data):
         try:
-            user = Usuarios.objects(username=data["username"]).get()
+            user = User.objects(username=data["username"]).get()
             response = jsonify({"return_code": 200, "message": user}), 200
         except :
             response = jsonify({"return_code": 500, "message": "No se pueden obtener los datos de los usuarios"}), 400
