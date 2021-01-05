@@ -10,5 +10,5 @@ class User(me.Document):
     password = me.StringField(required=True)
     isAdmin = me.BooleanField(required=True, default=False)
     blocked = me.BooleanField(required=True, default=False)
-    levelsCreated = me.ListField(me.ReferenceField(Level, reverse_delete_rule=me.PULL)) # me.ListField(me.IntField())
+    levelsCreated = me.ListField(me.ReferenceField(Level, reverse_delete_rule=me.PULL))
     levelsRating = me.ListField(me.EmbeddedDocumentField(LevelRating))
