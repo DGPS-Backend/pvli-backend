@@ -1,6 +1,7 @@
 from flask import request
 from flask import jsonify
 from flask import Blueprint
+from daos.daoUsers import User
 from daos.daoLevels import Level, UserRating, Comment
 from mongoengine.errors import NotUniqueError
 from mongoengine.errors import ValidationError
@@ -15,26 +16,36 @@ levels = Blueprint("levels", __name__)
 @levels.route('/loadLevels', methods=['POST'])
 def loadLevels():
 
-    print("/loadLevels RECIBE", request.get_json())
+    '''
+    MANU
+    Sensibilidad a minusculas y mayúsculas. *.*
+    Ordenado ppor puntuacion.
+    '''
+
+    # print("/loadLevels RECIBE", request.get_json())
 
     data = request.get_json()
     response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
 
     if ("filter_text" in data):
+        
         try:
-            # COMO NO ME DIGAS QUE OSTIAS VA EN EL FILTRO POCO...
 
-            response = jsonify({"return_code": 200,
-                                "message": "OK"
-                                }), 200
+            # COMO NO ME DIGAS QUE OSTIAS VA EN EL FILTRO POCO...
+            response = jsonify({"return_code": 200, "message": "OK"}), 200
 
         except:
+
             pass
 
     return response
 
 @levels.route('/loadLevel', methods=['POST'])
 def loadLevel():
+
+    '''
+    Devolver nulo si es necesario.
+    '''
 
     print("/loadLevel RECIBE", request.get_json())
 
@@ -79,19 +90,30 @@ def loadLevel():
 @levels.route('/storeLevel', methods=['POST'])
 def storeLevel():
 
-    # print("/storeLevel RECIBE", request.get_json())
+    '''
+    Crear una coleccion de contadores.
+    '''
+
+    print("/storeLevel RECIBE", request.get_json())
 
     data = request.get_json()
-    response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+    response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
 
-    if ("name_level" in data) and ("json" in data):
+    if ("name_level" in data) and ("username" in data) and ("json" in data):
         
         # Genera ID único
         id = randint(0, max_level_id)
 
         try:
 
-            Level(id=id, name=data["name_level"], phaserObject=data["json"]).save(force_insert=True)
+            # Crea un objeto de tipo nivel.
+            level = Level(id=id, name=data["name_level"], phaserObject=data["json"])
+            
+            # Guardamos el nivel en la base de datos.
+            level.save(force_insert=True)
+
+            # Guarda en el array de niveles del usuario la referencia al nivel.
+            User.objects(username=data["username"]).update_one(push__levelsCreated=level)
 
             response = jsonify({"return_code": 200, "message": "OK", "id": id, "json": data["json"]}), 200
 
@@ -101,7 +123,7 @@ def storeLevel():
             response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
         except ServerSelectionTimeoutError:
             response = jsonify({"return_code": 500, "message": "Connection to database failed"}), 500
-
+        
     return response
 
 @levels.route('/commentLevel', methods=['PUT'])
@@ -130,6 +152,11 @@ def commentLevel():
 @levels.route('/rateLevel', methods=['PUT'])
 def rateLevel():
     
+    '''
+    MANU
+    Hacerlo if-else para actualizar o insertar.
+    '''
+
     # print("/rateLevel RECIBE", request.get_json())
 
     data = request.get_json()
@@ -139,7 +166,7 @@ def rateLevel():
         
         try:
 
-            # Actualiza la lista.            
+            # Actualiza la lista. 
             Level.objects(id=data["id_level"]).update_one(push__rating__ratingByUser=UserRating(username=data["id_user"], rating=data["rate"]))
 
             # Calcula la media del nivel.
@@ -174,10 +201,13 @@ def eraseLevel():
         
             level = Level.objects(id=data["id_level"])
 
-            level.delete()
-
-            response = jsonify({"return_code": 200, "message": "OK"}), 200
-
+            # Si no se encontró el nivel, devolvemos fallo, en caso contrario borramos y avisamos de ello.
+            if len(level) == 0:
+                response = jsonify({"return_code": 602, "message": "Level doesn't exits"}), 602
+            else:
+                level.delete() # Borra el objeto y la referencia en el array del usuario.
+                response = jsonify({"return_code": 200, "message": "OK"}), 200
+        
         except ValidationError:
             response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
         except ServerSelectionTimeoutError:
