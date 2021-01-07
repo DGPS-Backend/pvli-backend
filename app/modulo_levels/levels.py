@@ -49,7 +49,7 @@ def loadLevels():
 def loadLevel():
 
     '''
-    Devolver nulo si es necesario.
+    Devolver nulo si es necesario. READY 4 BASILIO
     '''
 
     print("/loadLevel RECIBE", request.get_json())
@@ -67,13 +67,12 @@ def loadLevel():
             image = level.image
             blocked = level.blocked
             json = level.phaserObject
-            # CHECK
             userName = level.username
             comments = level.comments
-
-
-            # rate = 0 LevelRating.objects(id=data["id_level"]).get()
-            avg = 0 # rate.avg
+            
+            avg = level.rating.avg
+            if avg == -1 :
+                avg = None
 
             response = jsonify({"return_code": 200,
                                 "message": "OK",
@@ -97,7 +96,7 @@ def loadLevel():
 def storeLevel():
 
     '''
-    Crear una coleccion de contadores.
+    Crear una coleccion de contadores. OK LISTO EVARISTO
     '''
 
     print("/storeLevel RECIBE", request.get_json())
