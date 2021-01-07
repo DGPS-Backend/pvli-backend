@@ -1,7 +1,7 @@
 from flask import request
 from flask import jsonify
 from flask import Blueprint
-from daos.daoUsers import User
+from daos.daoUsers import User, LevelRating
 from daos.daoLevels import Level, UserRating, Comment
 from mongoengine.errors import NotUniqueError
 from mongoengine.errors import ValidationError
@@ -21,27 +21,31 @@ levels = Blueprint("levels", __name__)
 @levels.route('/loadLevels', methods=['POST'])
 def loadLevels():
 
-    '''
-    MANU
-    Sensibilidad a minusculas y mayúsculas. *.*
-    Ordenado ppor puntuacion.
-    '''
-
     # print("/loadLevels RECIBE", request.get_json())
 
     data = request.get_json()
-    response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+    response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
 
-    if ("filter_text" in data):
+    try:
 
-        try:
+        if ("filter_text" in data):
 
-            # COMO NO ME DIGAS QUE OSTIAS VA EN EL FILTRO POCO...
-            response = jsonify({"return_code": 200, "message": "OK"}), 200
+            # Busca un nivel que contenga el texto que viene en el campo del filtro.
+            levels = Level.objects(name__icontains=data["filter_text"]).order_by('-rating.avg')
 
-        except:
+            response = jsonify({"return_code": 200, "message": "OK", "games": levels.to_json()}), 200
 
-            pass
+        else:
+
+            # Devolver los niveles del modo historia.
+            levels = Level.objects()
+
+            response = jsonify({"return_code": 200, "message": "OK", "games": levels.to_json()}), 200
+
+    except ValidationError:
+        response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
+    except ServerSelectionTimeoutError:
+        response = jsonify({"return_code": 500, "message": "Connection to database failed"}), 500
 
     return response
 
@@ -55,7 +59,7 @@ def loadLevel():
     print("/loadLevel RECIBE", request.get_json())
 
     data = request.get_json()
-    response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
+    response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
 
     if ("id_level" in data):
 
@@ -159,11 +163,6 @@ def commentLevel():
 @levels.route('/rateLevel', methods=['PUT'])
 def rateLevel():
 
-    '''
-    MANU
-    Hacerlo if-else para actualizar o insertar.
-    '''
-
     print("/rateLevel RECIBE", request.get_json())
 
     data = request.get_json()
@@ -173,10 +172,25 @@ def rateLevel():
 
         try:
 
-            level = Level.objects(id=data["id_level"]).get()
+            # Comprobamos si el usuario ya valoró el nivel.
+            user = User.objects(username=data["id_user"], levelsRating__idLevel=data["id_level"])
 
-            # Actualiza la lista.
-            Level.objects(id=data["id_level"]).update_one(push__rating__ratingByUser=UserRating(username=data["id_user"], rating=data["rate"]))
+            # Si el usuario no había valorado el nivel.
+            if len(user) == 0:
+
+                # Insertamos por vez primera la crítica en la lista de críticas del usuario.
+                User.objects(username=data["id_user"]).update_one(push__levelsRating=LevelRating(idLevel=data["id_level"], rating=data["rate"]))
+
+                # Insertamos por vez primera la crítica en la lista de críticas del nivel.
+                Level.objects(id=data["id_level"]).update_one(push__rating__ratingByUser=UserRating(username=data["id_user"], rating=data["rate"]))
+
+            else:
+
+                # Actualiza la crítica en la lista del usuario.
+                user.update_one(set__levelsRating__S__rating=data["rate"])
+
+                # Actualiza la crítica en la lista del nivel.
+                Level.objects(id=data["id_level"], rating__ratingByUser__username=data["id_user"]).update_one(set__rating__ratingByUser__S__rating=data["rate"])
 
             # Calcula la media del nivel.
             info = Level.objects(id=data["id_level"]).aggregate({"$project": { "average": { "$avg": "$rating.ratingByUser.rating" } } })
