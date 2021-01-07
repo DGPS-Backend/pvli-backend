@@ -13,10 +13,10 @@ max_level_id = 999999999999
 levels = Blueprint("levels", __name__)
 
 # Loadlevels - Sensible a las mayus, ordenar x puntuaciones -M
-# loadlevel - devolver nulo en el user si no hay creador de nivel -B
-# storelevel - coleccion de contadores -B
+# loadlevel - devolver nulo en el user si no hay creador de nivel -B OK
+# storelevel - coleccion de contadores -B OK
 # rate - if else para actualizar o insertar -M
-# erase - comprobar si el nivel existe, cascade -a medias
+# erase - comprobar si el nivel existe, cascade -a medias OK Manu maquinon
 
 @levels.route('/loadLevels', methods=['POST'])
 def loadLevels():
@@ -69,7 +69,7 @@ def loadLevel():
             json = level.phaserObject
             userName = level.username
             comments = level.comments
-            
+
             avg = level.rating.avg
             if avg == -1 :
                 avg = None
@@ -164,7 +164,7 @@ def rateLevel():
     Hacerlo if-else para actualizar o insertar.
     '''
 
-    # print("/rateLevel RECIBE", request.get_json())
+    print("/rateLevel RECIBE", request.get_json())
 
     data = request.get_json()
     response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
@@ -172,6 +172,8 @@ def rateLevel():
     if ("id_level" in data) and ("id_user" in data) and ("rate" in data):
 
         try:
+
+            level = Level.objects(id=data["id_level"]).get()
 
             # Actualiza la lista.
             Level.objects(id=data["id_level"]).update_one(push__rating__ratingByUser=UserRating(username=data["id_user"], rating=data["rate"]))
