@@ -12,12 +12,6 @@ max_level_id = 999999999999
 
 levels = Blueprint("levels", __name__)
 
-# Loadlevels - Sensible a las mayus, ordenar x puntuaciones -M
-# loadlevel - devolver nulo en el user si no hay creador de nivel -B OK
-# storelevel - coleccion de contadores -B OK
-# rate - if else para actualizar o insertar -M
-# erase - comprobar si el nivel existe, cascade -a medias OK Manu maquinon
-
 @levels.route('/loadLevels', methods=['POST'])
 def loadLevels():
 
@@ -51,10 +45,6 @@ def loadLevels():
 
 @levels.route('/loadLevel', methods=['POST'])
 def loadLevel():
-
-    '''
-    Devolver nulo si es necesario. READY 4 BASILIO
-    '''
 
     print("/loadLevel RECIBE", request.get_json())
 
@@ -98,10 +88,6 @@ def loadLevel():
 
 @levels.route('/storeLevel', methods=['POST'])
 def storeLevel():
-
-    '''
-    Crear una coleccion de contadores. OK LISTO EVARISTO
-    '''
 
     print("/storeLevel RECIBE", request.get_json())
 
