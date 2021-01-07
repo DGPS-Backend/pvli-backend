@@ -12,6 +12,11 @@ max_level_id = 999999999999
 
 levels = Blueprint("levels", __name__)
 
+# Loadlevels - Sensible a las mayus, ordenar x puntuaciones -M
+# loadlevel - devolver nulo en el user si no hay creador de nivel -B
+# storelevel - coleccion de contadores -B
+# rate - if else para actualizar o insertar -M
+# erase - comprobar si el nivel existe, cascade -a medias
 
 @levels.route('/loadLevels', methods=['POST'])
 def loadLevels():
@@ -28,7 +33,7 @@ def loadLevels():
     response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
 
     if ("filter_text" in data):
-        
+
         try:
 
             # COMO NO ME DIGAS QUE OSTIAS VA EN EL FILTRO POCO...
@@ -55,16 +60,17 @@ def loadLevel():
     if ("id_level" in data):
 
         try:
-            
+
             level = Level.objects(id=data["id_level"]).get()
 
             name = level.name
             image = level.image
             blocked = level.blocked
             json = level.phaserObject
-            # userName = level.username
+            # CHECK
+            userName = level.username
             comments = level.comments
-            
+
 
             # rate = 0 LevelRating.objects(id=data["id_level"]).get()
             avg = 0 # rate.avg
@@ -74,7 +80,7 @@ def loadLevel():
                                 "json": json,
                                 "name_level": name,
                                 "img": image,
-                                # "id_user": userName, #PENDIENTE ISAURO
+                                "id_user": userName,
                                 "comments": comments,
                                 "blocked": blocked,
                                 "rate": avg,
@@ -99,16 +105,18 @@ def storeLevel():
     data = request.get_json()
     response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
 
-    if ("name_level" in data) and ("username" in data) and ("json" in data):
-        
-        # Genera ID único
-        id = randint(0, max_level_id)
+    if ("name_level" in data) and ("username" in data) and ("json" in data) :
 
         try:
 
             # Crea un objeto de tipo nivel.
-            level = Level(id=id, name=data["name_level"], phaserObject=data["json"])
-            
+            level = Level(name=data["name_level"],
+                          username=data["username"],
+                          phaserObject=data["json"])
+
+            # Obtener id autoincremental
+            id = level.id
+
             # Guardamos el nivel en la base de datos.
             level.save(force_insert=True)
 
@@ -123,7 +131,7 @@ def storeLevel():
             response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
         except ServerSelectionTimeoutError:
             response = jsonify({"return_code": 500, "message": "Connection to database failed"}), 500
-        
+
     return response
 
 @levels.route('/commentLevel', methods=['PUT'])
@@ -135,9 +143,9 @@ def commentLevel():
     response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
 
     if ("id_level" in data) and ("id_user" in data) and ("comment" in data):
-        
+
         try:
-            
+
             Level.objects(id=data["id_level"]).update_one(push__comments=Comment(username=data["id_user"], comment=data["comment"]))
 
             response = jsonify({"return_code": 200, "message": "OK"}), 200
@@ -151,7 +159,7 @@ def commentLevel():
 
 @levels.route('/rateLevel', methods=['PUT'])
 def rateLevel():
-    
+
     '''
     MANU
     Hacerlo if-else para actualizar o insertar.
@@ -163,10 +171,10 @@ def rateLevel():
     response = jsonify({"return_code": 400, "message": "Solicitud incorrecta"}), 400
 
     if ("id_level" in data) and ("id_user" in data) and ("rate" in data):
-        
+
         try:
 
-            # Actualiza la lista. 
+            # Actualiza la lista.
             Level.objects(id=data["id_level"]).update_one(push__rating__ratingByUser=UserRating(username=data["id_user"], rating=data["rate"]))
 
             # Calcula la media del nivel.
@@ -184,7 +192,7 @@ def rateLevel():
             response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
         except ServerSelectionTimeoutError:
             response = jsonify({"return_code": 500, "message": "Connection to database failed"}), 500
-        
+
     return response
 
 @levels.route('/eraseLevel', methods=['POST'])
@@ -196,9 +204,9 @@ def eraseLevel():
     response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
 
     if ("id_level" in data):
-        
+
         try:
-        
+
             level = Level.objects(id=data["id_level"])
 
             # Si no se encontró el nivel, devolvemos fallo, en caso contrario borramos y avisamos de ello.
@@ -207,7 +215,7 @@ def eraseLevel():
             else:
                 level.delete() # Borra el objeto y la referencia en el array del usuario.
                 response = jsonify({"return_code": 200, "message": "OK"}), 200
-        
+
         except ValidationError:
             response = jsonify({"return_code": 400, "message": "Bad Request"}), 400
         except ServerSelectionTimeoutError:
