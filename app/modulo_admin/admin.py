@@ -35,29 +35,66 @@ def getStatistics():
 
 @admin.route('/getAdminData', methods=['GET'])
 def getAdminData():
-    print("/getAdminData RECIBE", request.get_json())
-    return jsonify({"return_code": "200"}), 200
+    #print("/getAdminData RECIBE", request.get_json())
+    try:
+        levels = Level.objects()
+        users = User.objects()
+        response = jsonify({"return_code": "200", "users":users.to_json(), "levels":levels.to_json()}), 200
+    except :
+        response = jsonify({"return_code": "500","message": "Internal Problem"}), 500
+
+    return response
+
 
 @admin.route('/blockLevel', methods=['PUT'])
-#@admin_required TODO uncomment for release.
 def blockLevel():
-    receivedData = request.get_json()
-    retCode = None
+    data = request.get_json()
+    response = jsonify({"return_code": 200, "message": "OK"}), 200
 
-    if "id_level" in receivedData:
-        idLevel = receivedData["id_level"]
+    if ("id_level" in data):
+        try:
+            level = Level.objects(id=data["id_level"])
+            levelInfo = level.get()
+            if not levelInfo.blocked :
+                level.update_one(blocked=True)
+                mssg = "the level: {} is now blocked".format(levelInfo.id)
+            else :
+                mssg = "the level: {} was already blocked".format(levelInfo.id)
 
-        #TODO block the level with id idLevel.
-        retCode = 200
+            response = jsonify({"return_code": 200, "message": mssg}), 200
+        except :
+            response = jsonify({"return_code": 200, "message": "The level can't be blocked"}), 601
+
     else:
-        retCode = 400
 
-    return jsonify({"return_code": retCode}), 200
+        response = jsonify({"return_code": 400, "message": "Wrong Solicitation"}), 400
+
+    return response
 
 @admin.route('/unblockLevel', methods=['PUT'])
 def unblockLevel():
-    print("/unblockLevel RECIBE", request.get_json())
-    return jsonify({"return_code": "200"}), 200
+    data = request.get_json()
+    response = jsonify({"return_code": 200, "message": "OK"}), 200
+
+    if ("id_level" in data):
+        try:
+            level = Level.objects(id=data["id_level"])
+            levelInfo = level.get()
+            if levelInfo.blocked :
+                level.update_one(blocked=False)
+                mssg = "the level: {} is now not blocked".format(levelInfo.id)
+            else :
+                mssg = "the level: {} was already not blocked".format(levelInfo.id)
+
+            response = jsonify({"return_code": 200, "message": mssg}), 200
+        except :
+            response = jsonify({"return_code": 200, "message": "The level can't be unblocked"}), 601
+
+    else:
+
+        response = jsonify({"return_code": 400, "message": "Wrong Solicitation"}), 400
+
+    return response
 
 @admin.route('/blockUser', methods=['PUT'])
 def blockUser():
