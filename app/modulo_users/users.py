@@ -4,6 +4,7 @@ from daos.daoUsers import User
 from mongoengine.errors import NotUniqueError
 from mongoengine.errors import ValidationError
 from pymongo.errors import ServerSelectionTimeoutError
+from flask_cors import CORS
 
 users = Blueprint("users", __name__)
 
@@ -26,6 +27,7 @@ def user_required(view):
 
     return wrapped_view
 
+CORS(users)
 @users.route('/newUser', methods=['POST'])
 def newUser():
 
